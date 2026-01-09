@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MediScan AI – 50+ Diseases</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:'Inter',sans-serif;
+  background:#f0f8ff;
+  overflow-x:hidden;
+}
+#canvas-container{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+}
+.app{
+  max-width:1200px;
+  margin:auto;
+  padding:30px;
+  color:#222;
+}
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+header h2{
+  font-size:2rem;
+  font-weight:700;
+  color:#0077b6;
+}
+header span{
+  font-weight:600;
+  color:#0096c7;
+}
+.glass{
+  background:rgba(255,255,255,0.95);
+  border-radius:20px;
+  padding:30px;
+  border:1px solid rgba(0,0,0,0.1);
+  box-shadow:0 8px 25px rgba(0,0,0,0.05);
+  margin-bottom:25px;
+}
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:25px;
+}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+input{
+  width:100%;
+  padding:14px;
+  margin-top:12px;
+  border-radius:12px;
+  border:1px solid #ccc;
+  font-weight:600;
+}
+button{
+  width:100%;
+  padding:16px;
+  margin-top:20px;
+  border:none;
+  border-radius:12px;
+  font-weight:700;
+  font-size:1rem;
+  background:linear-gradient(135deg,#00b4d8,#48cae4);
+  color:white;
+  cursor:pointer;
+}
+.symptoms{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:15px;
+  max-height:300px;
+  overflow-y:auto;
+  padding-right:5px;
+}
+.symptom{
+  padding:10px 18px;
+  border-radius:25px;
+  background:#e6f0ff;
+  font-weight:600;
+  cursor:pointer;
+  flex-shrink:0;
+}
+.symptom.active{
+  background:#00b4d8;
+  color:white;
+}
+.result{text-align:center}
+.result h3{font-weight:700;margin-bottom:8px;}
+.result h1{font-size:3rem;font-weight:700;margin:5px 0;}
+.section{margin-top:15px;font-size:15px;line-height:1.5;font-weight:600;}
+.section b{color:#0077b6;font-weight:700;}
+.note{margin-top:12px;color:#e63946;font-weight:700;font-size:15px}
+#reasonSection{margin-top:20px;}
+#reasonSection h3{font-size:1.2rem;margin-bottom:6px;color:#0077b6;}
+#reasonSection p{margin-bottom:10px;font-size:14px;line-height:1.4;}
+#gauge{width:260px;margin:auto;}
+#needle{transform-origin:50% 90%;transition:transform 1.2s ease-out;}
+</style>
+</head>
+
+<body>
+<div id="canvas-container"></div>
+
+<div class="app">
+<header>
+<h2>MediScan AI</h2>
+<span>50+ Disease Risk Analyzer</span>
+</header>
+
+<div class="grid">
+<div class="glass">
+<h3>Patient Inputs</h3>
+<input id="age" type="number" placeholder="Age">
+<input id="temp" type="number" placeholder="Temperature °C">
+<input id="hr" type="number" placeholder="Heart Rate (optional)">
+<input id="bp" type="number" placeholder="Blood Pressure (optional)">
+
+<div class="symptoms" id="symptomContainer">
+<!-- Example Symptoms -->
+<div class="symptom" data="Chest Pain">Chest Pain</div>
+<div class="symptom" data="Cough">Cough</div>
+<div class="symptom" data="Fatigue">Fatigue</div>
+<div class="symptom" data="Fever">Fever</div>
+<div class="symptom" data="Breath Issue">Breath Issue</div>
+<div class="symptom" data="Headache">Headache</div>
+<div class="symptom" data="Nausea">Nausea</div>
+<div class="symptom" data="Vomiting">Vomiting</div>
+<div class="symptom" data="Diarrhea">Diarrhea</div>
+<div class="symptom" data="Dizziness">Dizziness</div>
+<div class="symptom" data="Sore Throat">Sore Throat</div>
+<div class="symptom" data="Sneezing">Sneezing</div>
+<div class="symptom" data="Loss of Smell">Loss of Smell</div>
+<div class="symptom" data="Loss of Taste">Loss of Taste</div>
+<div class="symptom" data="Sweating">Sweating</div>
+<div class="symptom" data="Abdominal Pain">Abdominal Pain</div>
+<div class="symptom" data="Rapid Heartbeat">Rapid Heartbeat</div>
+<div class="symptom" data="Blurred Vision">Blurred Vision</div>
+<div class="symptom" data="Frequent Urination">Frequent Urination</div>
+<div class="symptom" data="Body Pain">Body Pain</div>
+<div class="symptom" data="Muscle Pain">Muscle Pain</div>
+<div class="symptom" data="Back Pain">Back Pain</div>
+<div class="symptom" data="Joint Pain">Joint Pain</div>
+<div class="symptom" data="Cold Limbs">Cold Limbs</div>
+<div class="symptom" data="Rapid Breathing">Rapid Breathing</div>
+<div class="symptom" data="Swelling">Swelling</div>
+<div class="symptom" data="Rash">Rash</div>
+<div class="symptom" data="Itching">Itching</div>
+<div class="symptom" data="Red Eyes">Red Eyes</div>
+<div class="symptom" data="Chest Tightness">Chest Tightness</div>
+<div class="symptom" data="Heartburn">Heartburn</div>
+<div class="symptom" data="Constipation">Constipation</div>
+<div class="symptom" data="Indigestion">Indigestion</div>
+<div class="symptom" data="Nasal Congestion">Nasal Congestion</div>
+<div class="symptom" data="Chills">Chills</div>
+<div class="symptom" data="Anxiety">Anxiety</div>
+<div class="symptom" data="Depression">Depression</div>
+<div class="symptom" data="Insomnia">Insomnia</div>
+<div class="symptom" data="Palpitations">Palpitations</div>
+<div class="symptom" data="Bleeding">Bleeding</div>
+<div class="symptom" data="Bruising">Bruising</div>
+<div class="symptom" data="Cramps">Cramps</div>
+<div class="symptom" data="Hair Loss">Hair Loss</div>
+<div class="symptom" data="Swollen Lymph Nodes">Swollen Lymph Nodes</div>
+<div class="symptom" data="Thirst">Thirst</div>
+<div class="symptom" data="Weight Loss">Weight Loss</div>
+<div class="symptom" data="Weight Gain">Weight Gain</div>
+<div class="symptom" data="Skin Discoloration">Skin Discoloration</div>
+<div class="symptom" data="Paleness">Paleness</div>
+<div class="symptom" data="Confusion">Confusion</div>
+<div class="symptom" data="Seizures">Seizures</div>
+</div>
+
+<button onclick="runAI()">Run Diagnosis</button>
+<div class="note" id="optionalNote"></div>
+</div>
+
+<div class="glass result">
+<h3>Risk Analysis</h3>
+<svg id="gauge" viewBox="0 0 200 120">
+<path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="#ddd" stroke-width="12"/>
+<line id="needle" x1="100" y1="100" x2="100" y2="30" stroke="#ff4d4d" stroke-width="4"/>
+</svg>
+<h1 id="riskText">--%</h1>
+<h3 id="disease">Waiting</h3>
+
+<div id="reasonSection">
+  <h3>Diagnosis Reason</h3>
+  <p id="whyDisease">--</p>
+  <h3>Risk Reason</h3>
+  <p id="whyRisk">--</p>
+</div>
+
+<div class="section" id="precautions"></div>
+</div>
+</div>
+
+<!-- MEDICAL DISCLAIMER -->
+<div class="glass" style="background:#fff3f3; border:1px solid #ffb3b3;">
+  <h3 style="color:#d90429;">⚠️ Medical Disclaimer</h3>
+  <p style="font-size:14px; line-height:1.5; font-weight:600;">
+    This application provides AI-based predicted results for informational purposes only.  
+    The diagnosis and risk analysis may not always be accurate.  
+    It is <b>not a substitute for professional medical advice</b>.  
+    Always consult a qualified doctor or healthcare professional for proper diagnosis and treatment.
+  </p>
+</div>
+</div>
+
+<script>
+/* ===== 3D BACKGROUND ===== */
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf0f8ff);
+const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 1000);
+camera.position.z = 70;
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+renderer.setSize(innerWidth, innerHeight);
+document.getElementById("canvas-container").appendChild(renderer.domElement);
+
+scene.add(new THREE.AmbientLight(0xffffff,0.9));
+const pointLight = new THREE.PointLight(0xffffff,1.2);
+pointLight.position.set(50,50,50);
+scene.add(pointLight);
+
+const units = [];
+const unitColors = [0xff6b6b,0xffcad4,0x48cae4,0xff9f1c,0x2ec4b6];
+for(let i=0;i<450;i++){
+  const type = Math.floor(Math.random()*3);
+  let geo;
+  if(type===0) geo = new THREE.SphereGeometry(Math.random()*1+0.4,32,32);
+  if(type===1) geo = new THREE.TetrahedronGeometry(Math.random()*0.5+0.2,1);
+  if(type===2) geo = new THREE.IcosahedronGeometry(Math.random()*0.4+0.2,1);
+  const mat = new THREE.MeshStandardMaterial({
+    color:unitColors[Math.floor(Math.random()*unitColors.length)],
+    transparent:true,opacity:0.85, roughness:0.3, metalness:0.3
+  });
+  const u = new THREE.Mesh(geo, mat);
+  u.position.set((Math.random()-.5)*140,(Math.random()-.5)*100,(Math.random()-.5)*100);
+  u.userData.spdX=Math.random()*0.05-0.025;
+  u.userData.spdY=Math.random()*0.05-0.025;
+  u.userData.spdZ=Math.random()*0.05-0.025;
+  units.push(u);
+  scene.add(u);
+}
+
+let mouseX=0, mouseY=0;
+document.addEventListener("mousemove", e=>{
+  mouseX=(e.clientX/innerWidth-.5)*2;
+  mouseY=(.5-e.clientY/innerHeight)*2;
+});
+
+(function animate(){
+  requestAnimationFrame(animate);
+  units.forEach(u=>{
+    u.position.x += u.userData.spdX;
+    u.position.y += u.userData.spdY;
+    u.position.z += u.userData.spdZ;
+    if(Math.abs(u.position.x)>70) u.userData.spdX*=-1;
+    if(Math.abs(u.position.y)>50) u.userData.spdY*=-1;
+    if(Math.abs(u.position.z)>50) u.userData.spdZ*=-1;
+    u.rotation.x += 0.01;
+    u.rotation.y += 0.01;
+  });
+  camera.position.x += (mouseX*25-camera.position.x)*0.05;
+  camera.position.y += (mouseY*20-camera.position.y)*0.05;
+  renderer.render(scene,camera);
+})();
+
+/* ===== SYMPTOMS SELECTION ===== */
+let selected = new Set();
+document.querySelectorAll(".symptom").forEach(s=>{
+    s.onclick=()=>{
+        s.classList.toggle("active");
+        selected.has(s.dataset.value)?selected.delete(s.dataset.value):selected.add(s.dataset.value);
+    }
+});
+
+/* ===== DISEASE DATABASE ===== */
+const diseaseDB = [
+  {name:"Flu", symptoms:["Fever","Cough","Fatigue","Body Pain","Sneezing","Sore Throat"], minRisk:30, precautions:"Rest, hydrate, avoid cold exposure, monitor temperature."},
+  {name:"Pneumonia", symptoms:["Chest Pain","Breath Issue","Fever","Cough","Rapid Breathing"], minRisk:55, precautions:"Seek medical help immediately, rest, monitor breathing."},
+  {name:"Food Poisoning", symptoms:["Vomiting","Diarrhea","Abdominal Pain","Nausea","Fever"], minRisk:40, precautions:"Hydrate, eat light foods, rest, monitor symptoms."},
+  {name:"Migraine", symptoms:["Headache","Fatigue","Dizziness","Insomnia"], minRisk:45, precautions:"Rest in dark quiet place, hydrate, avoid screen exposure."},
+  {name:"Common Cold", symptoms:["Cough","Sneezing","Sore Throat","Fever"], minRisk:20, precautions:"Rest, hydrate, monitor symptoms."},
+  {name:"COVID-19", symptoms:["Fever","Cough","Loss of Smell","Loss of Taste","Breath Issue","Fatigue"], minRisk:50, precautions:"Isolate, monitor symptoms, seek medical care."},
+  {name:"Heart Attack", symptoms:["Chest Pain","Sweating","Rapid Heartbeat","Nausea"], minRisk:70, precautions:"Call emergency services immediately."},
+  {name:"Gastroenteritis", symptoms:["Vomiting","Diarrhea","Abdominal Pain","Fever"], minRisk:45, precautions:"Hydrate, eat light foods, rest."},
+  {name:"Hypertension Crisis", symptoms:["Headache","Blurred Vision","Rapid Heartbeat","Sweating"], minRisk:65, precautions:"Seek urgent medical care."},
+  {name:"Diabetes Issue", symptoms:["Frequent Urination","Fatigue","Blurred Vision","Thirst"], minRisk:50, precautions:"Monitor blood sugar, hydrate, consult doctor."},
+  {name:"Anxiety Disorder", symptoms:["Anxiety","Insomnia","Palpitations"], minRisk:35, precautions:"Practice relaxation, consult a therapist."},
+  {name:"Depression", symptoms:["Depression","Fatigue","Insomnia","Loss of Appetite"], minRisk:40, precautions:"Consult a mental health professional."},
+  {name:"Hypertension", symptoms:["Headache","Blurred Vision","Sweating","Rapid Heartbeat"], minRisk:50, precautions:"Monitor BP, reduce salt intake, consult doctor."},
+  {name:"Cold Limbs Syndrome", symptoms:["Cold Limbs","Fatigue","Paleness"], minRisk:25, precautions:"Keep warm, exercise, consult doctor if persistent."},
+  {name:"Migraine with Aura", symptoms:["Headache","Blurred Vision","Dizziness","Nausea"], minRisk:50, precautions:"Rest, avoid triggers, consult doctor if frequent."}
+];
+
+/* ===== AI LOGIC ===== */
+function runAI(){
+  if(!temp.value){ alert("Temperature is required"); return; }
+
+  let risk=0;
+  if(temp.value>39) risk+=30;
+  else if(temp.value>38) risk+=20;
+  else if(temp.value>37) risk+=10;
+  if(hr.value) risk += hr.value>130?25: hr.value>110?15:0;
+  if(bp.value) risk += bp.value>180?25: bp.value>160?15:0;
+  risk += selected.size*6;
+  risk = Math.min(100,risk*1.3);
+  document.getElementById("riskText").innerText = risk.toFixed(1)+"%";
+
+  let riskLevel = risk<=30?"Minor":risk<80?"Moderate":"Critical";
+  document.getElementById("needle").style.transform = `rotate(${(risk/100)*180-90}deg)`;
+
+  // Find closest disease
+  const symptomsArr = Array.from(selected);
+  let bestMatch = null;
+  let maxMatch=0;
+  diseaseDB.forEach(d=>{
+    const match = d.symptoms.filter(s=>symptomsArr.includes(s)).length;
+    if(match>maxMatch){
+      maxMatch = match;
+      bestMatch = d;
+    }
+  });
+
+  if(!bestMatch) bestMatch = {name:`${riskLevel} Condition`, precautions:"Maintain healthy routine, rest, and monitor symptoms."};
+
+  document.getElementById("disease").innerText = bestMatch.name;
+
+  // Background color
+  if(risk<=30) scene.background=new THREE.Color(0xd4f4dd);
+  else if(risk<80) scene.background=new THREE.Color(0xfff3bf);
+  else scene.background=new THREE.Color(0xffcccc);
+
+  // Generate diagnosis reason automatically
+  let diagReason = `Patient shows ${symptomsArr.length?symptomsArr.join(", "):"minimal symptoms"}. `;
+  if(temp.value>37) diagReason += `Temperature is ${temp.value}°C. `;
+  if(hr.value) diagReason += `Heart rate: ${hr.value} bpm. `;
+  if(bp.value) diagReason += `Blood pressure: ${bp.value} mmHg. `;
+  diagReason += `Symptoms most closely match ${bestMatch.name}.`;
+
+  let riskReason = `Calculated risk is ${risk.toFixed(1)}% (${riskLevel}). `;
+  riskReason += symptomsArr.length?`Higher symptom count increases severity.`:`Fewer symptoms indicate lower severity.`;
+
+  document.getElementById("whyDisease").innerText = diagReason;
+  document.getElementById("whyRisk").innerText = riskReason;
+  document.getElementById("precautions").innerHTML = `<b>Precautions:</b> ${bestMatch.precautions}`;
+
+  // Voice output
+  const msg = new SpeechSynthesisUtterance(`Diagnosis: ${bestMatch.name}. Risk level: ${risk.toFixed(1)} percent, ${riskLevel}.`);
+  msg.lang='en-US';
+  window.speechSynthesis.speak(msg);
+
+  // Optional note
+  document.getElementById("optionalNote").innerText = (!hr.value || !bp.value)?"Note: For better accuracy, include Heart Rate and Blood Pressure.":"";
+}
+</script>
+</body>
+</html>
